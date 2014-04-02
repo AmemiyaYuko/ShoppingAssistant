@@ -1,0 +1,4 @@
+<?php
+$MAXITEMS=200;
+$NUMFORPIC=3;
+?>
