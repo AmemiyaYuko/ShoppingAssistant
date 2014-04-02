@@ -12,19 +12,18 @@ function purify($ori,$key,$num){
 		$pieces=strtok('"');
 	}
 	return $pieces;
-}
+}   
 function check_for_z($url){
 	if (fopen($url,"r")==false) return 0;
 	$tfile=fopen($url,"r");
 	$ts=fgets($tfile);
-	while (!feof($tfile)){
-		if (!(strstr($ts,"没有找到任何与")=="")){
+	while (!feof($tfile)){   
+		if (!(strstr($ts,"<span class=\"noResultsTitleKeyword\">")=="")){
 			return 0;
 		}
 		$ts=fgets($tfile);
 
 	}
-	echo $url;
 	return 1;	
 }
 $info=trim($_POST["info"]);
@@ -82,8 +81,36 @@ while (check_for_z($AZUrl)==1){
 	while(!feof($AZfile)){
 		$str=fgets($AZfile);
 		$kw="<div id=\"result_";
-
-
+		if (!(strstr($str, $kw)=="")){
+			$str=fgets($AZfile);
+			$str=fgets($AZfile);
+			$ItemBox_Url[$counter]=purify($str,"'",1);
+			$str=fgets($AZfile);
+			$ItemBox_Pic[$counter]=purify($str,'"',3);
+			while (strstr($str, "<h3 class=\"newaps\">")=="")
+				$str=fgets($AZfile);
+			$str=fgets($AZfile);
+			$pos=stripos($str,"<span class=\"lrg\">")+strlen("<span class=\"lrg\">");
+			$str=substr($str, $pos);
+			$pos=stripos($str,"</span>");
+			$ItemBox_Title[$counter]=substr($str,0,$pos);
+			$error=0;
+			while ((strstr($str,"<span class=\"bld lrg red\"> ￥")=="")||(!(strstr($str,"</del>")=="")))
+				if ($error>500) {
+					break;
+				}
+				else{
+					$str=fgets($AZfile);
+					$error++;
+				}
+			$pos=stripos($str, 	"<span class=\"bld lrg red\"> ￥")+strlen("<span class=\"bld lrg red\"> ￥");
+			$str=substr($str,$pos);
+			//echo "new: ".$str;
+			$pos=stripos($str, "</span>");
+			$ItemBox_Price_str[$counter]=substr($str,0,$pos);
+			$ItemBox_Price_float[$counter]=floatval($ItemBox_Price_str[$counter]);
+			$counter=$counter+1;
+		}
 	}
 	$page=$page+1;
 	$AZUrl=$AZOriUrl."?page=".$page."&keywords=".$info."&ie=GBK";
@@ -108,7 +135,7 @@ for ($i=0;$i<$counter;$i++){
 	<div class="col-md-3">
 		<img src="<?php echo $ItemBox_Pic[$i];?>" width="210px" height="210px">
 		<br>
-		<a href="<?php echo $ItemBox_Url[$i]?>"><?php echo $ItemBox_Title[$i];?></a>
+		<a href="<?php echo $ItemBox_Url[$i]?>" width="210px" height="210px"> <?php echo $ItemBox_Title[$i];?></a>
 		<br>
 		<a>Price : <?php echo $ItemBox_Price_str[$i];?></a>
 	</div>
