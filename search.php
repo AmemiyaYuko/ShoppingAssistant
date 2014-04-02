@@ -1,8 +1,20 @@
 <?php
-//require("inc/header.inc");
+require("inc/header.inc");
+?>
+<div class="collapse navbar-collapse">
+	<form class="navbar-form navbar-center" role="search" action="search.php" method="POST">
+    	<div class="form-group">
+        	<input type="text" class="form-control" placeholder="Search" size="36" name="info">
+        </div>
+    	<button type="submit" class="btn btn-info">Submit</button>
+    </form>
+</div>
+<?php
 $NUMFORPIC=3;
+$MAXPAGES=8;
 $NUMFORTITLE=9;
-$MAXITEMS=20;
+$MAXITEMS=50;
+//Because Taobao has too many results...
 $NUMFORURL=5;
 function purify($ori,$key,$num){
 	$pieces=strtok($ori,'"');
@@ -27,7 +39,6 @@ function check_for_z($url){
 	return 1;	
 }
 $info=trim($_POST["info"]);
-$info="filco";
 if ($info==$_SESSION["last_info"]){
 	$quest=($_POST["quest"]);
 }
@@ -35,7 +46,7 @@ $_SESSION["last_info"]=$info;
 $counter=0;
 $TBOriUrl="http://s.taobao.com/search?q=".$info;			//Taobao url
 $AZOriUrl="http://www.amazon.cn/s/ref=sr_pg_1";	//Amazon url
-/*
+
 //Taobao Analysis Module
 $TBfile = fopen($TBOriUrl,"r");
 $page=0;
@@ -43,10 +54,10 @@ $i=0;
 //promote=0&sort=sale-desc&tab=all&q=dota2&s=00#J_relative
 $TBUrl=$TBOriUrl."&romote=0&sort=sale-desc&tab=all&s=".$page."#J_relative";
 // URL of first page
-while (fopen($TBUrl,"r")){
+while ((fopen($TBUrl,"r"))&&($page<$MAXPAGES)){
 	$TBfile=fopen($TBUrl,"r");
 	while(!feof($TBfile)) { 
-		$str= fgets($TBfile); 
+		$str=fgets($TBfile); 
 		$kw="<div class=\"row item";
 		if (!(strstr($str,$kw)=="")){
 			//get to the img line.
@@ -54,7 +65,6 @@ while (fopen($TBUrl,"r")){
 				$str=fgets($TBfile);
 			//Add pic to ItemBox_pic
 			$ItemBox_Pic[$counter]=purify($str,'"',$NUMFORPIC);
-
 			//get to info line
 			for ($i=0;$i<12;$i++)
 				$str=fgets($TBfile);
@@ -72,11 +82,11 @@ while (fopen($TBUrl,"r")){
 	}
 	if ($page<$MAXITEMS) {$page=$page+40;} else break;
 	$TBUrl=$TBOriUrl."&romote=0&sort=sale-desc&tab=all&s=".$page."#J_relative";
-} */
+} 
 //Amazon Analysis Module
 $page=1;
 $AZUrl=$AZOriUrl."?page=".$page."&keywords=".$info."&ie=GBK";
-while (check_for_z($AZUrl)==1){
+while ((check_for_z($AZUrl)==1)&&($page<$MAXPAGES)){
 	$AZfile=fopen($AZUrl,"r");
 	while(!feof($AZfile)){
 		$str=fgets($AZfile);
@@ -87,9 +97,8 @@ while (check_for_z($AZUrl)==1){
 			$ItemBox_Url[$counter]=purify($str,"'",1);
 			$str=fgets($AZfile);
 			$ItemBox_Pic[$counter]=purify($str,'"',3);
-			while (strstr($str, "<h3 class=\"newaps\">")=="")
+			while (strstr($str,"class=\"lrg\">")=="")
 				$str=fgets($AZfile);
-			$str=fgets($AZfile);
 			$pos=stripos($str,"<span class=\"lrg\">")+strlen("<span class=\"lrg\">");
 			$str=substr($str, $pos);
 			$pos=stripos($str,"</span>");
@@ -142,5 +151,5 @@ for ($i=0;$i<$counter;$i++){
 	<?php
 
 }
-//require ("inc/footer.inc");
+require ("inc/footer.inc");
 ?>

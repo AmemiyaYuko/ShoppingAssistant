@@ -17,9 +17,9 @@ $_SESSION["last_info"]="";
           	<a class="navbar-brand" href="#">Search </a>
         </div>
         <div class="collapse navbar-collapse">
-          <form class="navbar-form navbar-center" role="search">
+          <form class="navbar-form navbar-center" role="search" action="search.php" method="POST">
             <div class="form-group">
-              <input type="text" class="form-control" placeholder="Search" size="36">
+              <input type="text" class="form-control" placeholder="Search" size="36" name="info">
             </div>
             <button type="submit" class="btn btn-info">Submit</button>
           </form>
